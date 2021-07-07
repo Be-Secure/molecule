@@ -20,15 +20,15 @@
 """Config Module."""
 
 import copy
-import functools
 import logging
 import os
-from typing import Callable, MutableMapping, TypeVar
+from typing import MutableMapping
 from uuid import uuid4
 
 from ansiblelint.config import ansible_version
 
 from molecule import api, interpolation, platforms, scenario, state, util
+from molecule.compat import cached_property
 from molecule.dependency import ansible_galaxy, shell
 from molecule.model import schema_v3
 from molecule.provisioner import ansible
@@ -41,14 +41,6 @@ MOLECULE_DIRECTORY = "molecule"
 MOLECULE_FILE = "molecule.yml"
 MOLECULE_KEEP_STRING = "MOLECULE_"
 DEFAULT_DRIVER = "delegated"
-
-T = TypeVar("T")
-
-
-# see https://github.com/python/mypy/issues/5858
-def cache(func: Callable[..., T]) -> T:
-    """Decorate properties to cache them."""
-    return functools.lru_cache()(func)  # type: ignore
 
 
 # https://stackoverflow.com/questions/16017397/injecting-function-call-after-init-with-decorator  # noqa
@@ -156,8 +148,7 @@ class Config(object, metaclass=NewInitCaller):
     def molecule_directory(self):
         return molecule_directory(self.project_directory)
 
-    @property  # type: ignore  # see https://github.com/python/mypy/issues/1362
-    @util.lru_cache()
+    @cached_property
     def dependency(self):
         dependency_name = self.config["dependency"]["name"]
         if dependency_name == "galaxy":
@@ -165,8 +156,7 @@ class Config(object, metaclass=NewInitCaller):
         elif dependency_name == "shell":
             return shell.Shell(self)
 
-    @property  # type: ignore
-    @util.lru_cache()
+    @cached_property
     def driver(self):
         driver_name = self._get_driver_name()
         driver = None
@@ -196,36 +186,30 @@ class Config(object, metaclass=NewInitCaller):
             "MOLECULE_VERIFIER_TEST_DIRECTORY": self.verifier.directory,
         }
 
-    @property  # type: ignore
-    @util.lru_cache()
+    @cached_property
     def lint(self):
         lint_name = self.config.get("lint", None)
         return lint_name
 
-    @property  # type: ignore
-    @util.lru_cache()
+    @cached_property
     def platforms(self):
         return platforms.Platforms(self, parallelize_platforms=self.is_parallel)
 
-    @property  # type: ignore
-    @cache
+    @cached_property
     def provisioner(self):
         provisioner_name = self.config["provisioner"]["name"]
         if provisioner_name == "ansible":
             return ansible.Ansible(self)
 
-    @property  # type: ignore
-    @util.lru_cache()
+    @cached_property
     def scenario(self):
         return scenario.Scenario(self)
 
-    @property  # type: ignore
-    @util.lru_cache()
+    @cached_property
     def state(self):
         return state.State(self)
 
-    @property  # type: ignore
-    @util.lru_cache()
+    @cached_property
     def verifier(self):
         return api.verifiers(self).get(self.config["verifier"]["name"], None)
 

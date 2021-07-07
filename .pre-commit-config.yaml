@@ -55,6 +55,7 @@ repos:
         pass_filenames: false
         additional_dependencies:
           - ansible-lint>=5.1.2
+          - cached_property~=1.5;python_version<="3.7"
           - click>=8.0.1
           - enrich>=1.2.5
           - importlib-metadata>=4.6.1

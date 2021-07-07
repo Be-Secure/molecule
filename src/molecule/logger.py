@@ -22,11 +22,12 @@
 import logging
 import os
 import time
-from functools import lru_cache, wraps
+from functools import wraps
 from typing import Callable, Iterable
 
 from enrich.logging import RichHandler
 
+from molecule.compat import cache
 from molecule.console import console, console_stderr
 from molecule.text import underscore
 
@@ -191,7 +192,7 @@ def section_logger(func: Callable) -> Callable:
     return wrapper
 
 
-@lru_cache()
+@cache
 def get_section_loggers() -> Iterable[Callable]:
     """Return a list of section wrappers to be added."""
     default_section_loggers = [section_logger]

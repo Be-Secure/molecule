@@ -28,7 +28,6 @@ import os
 import re
 import sys
 from dataclasses import dataclass
-from functools import lru_cache  # noqa
 from subprocess import CalledProcessError, CompletedProcess
 from typing import Any, Dict, List, MutableMapping, NoReturn, Optional, Union
 
@@ -37,6 +36,7 @@ import yaml
 from rich.syntax import Syntax
 from subprocess_tee import run
 
+from molecule.compat import cache
 from molecule.console import console
 from molecule.constants import MOLECULE_HEADER
 
@@ -334,7 +334,7 @@ def _parallelize_platforms(config, run_uuid):
     return [parallelize(platform) for platform in config["platforms"]]
 
 
-@lru_cache()
+@cache
 def find_vcs_root(location="", dirs=(".git", ".hg", ".svn"), default=None) -> str:
     """Return current repository root directory."""
     if not location:
